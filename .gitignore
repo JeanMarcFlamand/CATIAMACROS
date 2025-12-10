@@ -1,0 +1,9 @@
+# VS Code
+.vscode/
+
+# Fichiers temporaires
+*.tmp
+*.log
+
+# Archives
+*.zip
