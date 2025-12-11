@@ -1,0 +1,39 @@
+name: CATIA Script CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  syntax-check:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Syntax check all scripts
+        shell: pwsh
+        run: |
+          Get-ChildItem -Recurse -Include *.CATScript, *.vbs, *.bas | ForEach-Object {
+            Write-Host "Checking $_"
+            cscript //nologo $_
+          }
+
+  release-package:
+    needs: syntax-check
+    runs-on: windows-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create ZIP of macros
+        run: |
+          powershell Compress-Archive -Path src -DestinationPath catia_macros.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: catia-macros
+          path: catia_macros.zip
